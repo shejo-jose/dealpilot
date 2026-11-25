@@ -11,9 +11,10 @@ from config import OPEN_BONUS, TITLE_HIT_POINTS
 
 
 def _pattern(keyword: str) -> re.Pattern:
-    # Whole-word, case-insensitive match; spaces in a keyword match any whitespace.
+    # Whole-word, case-insensitive match; spaces in a keyword match any
+    # whitespace, and a plural "s"/"es" is allowed ("system" finds "systems").
     words = [re.escape(w) for w in keyword.strip().split()]
-    return re.compile(r"\b" + r"\s+".join(words) + r"\b", re.IGNORECASE)
+    return re.compile(r"\b" + r"\s+".join(words) + r"(?:e?s)?\b", re.IGNORECASE)
 
 
 def _parse_date(value) -> datetime | None:
