@@ -15,9 +15,13 @@ keywords.
 2. Looks for each product's keywords in the notice title, description and category.
 3. Shows the matches in a table: title, buyer, value, closing date, matched
    product, matched keywords and a link to the notice.
-4. Gives each match a simple score: 1 point per keyword found (2 if it is in
-   the title), plus 2 bonus points if the notice is still open for bids.
-5. Lets you download the table as a CSV file.
+4. Gives each match a simple score: 3 points per keyword found in the title,
+   1 point per keyword found only in the description or category, plus 2
+   bonus points if the notice is still open for bids. Keywords found in the
+   title are marked "(title)" in the table.
+5. Shows a notice once even when it is listed on both sites; the Source
+   column then names both.
+6. Lets you download the table as a CSV file.
 
 ## Run it on Windows with WSL
 
@@ -79,9 +83,10 @@ To change the default keywords or fill in product descriptions, edit
 - Find a Tender's own "stage" filter returned far too few results when we
   tested it, so the app downloads everything in the date range and filters
   by stage itself.
-- Keyword matching is simple whole-word search. Broad words such as
-  "workforce" or "customer service" will bring in some unrelated notices;
-  tune the lists as you learn what works.
+- Keyword matching is simple whole-word search (plurals included). Broad
+  words such as "workforce", "customer service" or "complaints" brought in
+  cleaning, drilling and vaccination tenders in our first run, so they were
+  removed from the defaults. Tune the lists as you learn what works.
 
 ## Files
 

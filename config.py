@@ -42,7 +42,6 @@ PRODUCTS = {
             "HR system",
             "payroll",
             "workforce management",
-            "workforce",
             "time and attendance",
             "rostering",
         ],
@@ -52,10 +51,9 @@ PRODUCTS = {
         "keywords": [
             "case management",
             "helpline",
-            "complaints",
             "complaints handling",
+            "complaints management",
             "CRM",
-            "customer service",
         ],
     },
 }
@@ -63,6 +61,8 @@ PRODUCTS = {
 # How many extra points a notice gets when it is still open for bids.
 OPEN_BONUS = 2
 
-# Points per keyword found in the title (keywords found only in the
-# description or category get 1 point each).
-TITLE_HIT_POINTS = 2
+# Points per keyword found in the notice title.
+TITLE_HIT_POINTS = 3
+
+# Points per keyword found only in the description or category.
+DESCRIPTION_HIT_POINTS = 1

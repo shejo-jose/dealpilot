@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
-from config import OPEN_BONUS, TITLE_HIT_POINTS
+from config import DESCRIPTION_HIT_POINTS, OPEN_BONUS, TITLE_HIT_POINTS
 
 
 def _pattern(keyword: str) -> re.Pattern:
@@ -47,6 +47,45 @@ def dedupe(rows: list[dict]) -> list[dict]:
     return list(latest.values())
 
 
+# Reference codes some buyers put in front of titles, e.g. "CA18704 - ",
+# "SCE0078 - ", "IT2716 - ", "P0402 - ", "715862519 - ".
+_REF_PREFIX = re.compile(r"^\s*[A-Za-z]{0,5}[\d][\w/.-]*\s*[-:_]\s+")
+
+
+def _norm(text: str | None) -> str:
+    text = _REF_PREFIX.sub("", text or "")
+    return " ".join(re.findall(r"[a-z0-9]+", text.lower()))
+
+
+def merge_cross_source(rows: list[dict]) -> list[dict]:
+    """Merge notices that appear on both Find a Tender and Contracts Finder.
+
+    Two rows are the same notice when the buyer matches and one title
+    contains the other once reference codes and punctuation are ignored
+    (e.g. "St Matthew's Primary School _ Luton" and
+    "CA18704 - St Matthew's Primary School _ Luton"). The higher-scoring
+    row is kept and its source lists both sites.
+    """
+    rows = sorted(rows, key=lambda r: r["score"], reverse=True)
+    kept: list[dict] = []
+    for r in rows:
+        buyer, title = _norm(r.get("buyer")), _norm(r.get("title"))
+        twin = None
+        if buyer and title:
+            for k in kept:
+                if k["source"] == r["source"] or r["source"] in k["source"]:
+                    continue
+                kt = _norm(k.get("title"))
+                if _norm(k.get("buyer")) == buyer and (title in kt or kt in title):
+                    twin = k
+                    break
+        if twin is None:
+            kept.append(dict(r))
+        else:
+            twin["source"] = f"{twin['source']} + {r['source']}"
+    return kept
+
+
 COLUMNS = [
     "score", "title", "buyer", "value", "currency", "closing_date", "open",
     "matched_product", "other_products", "matched_keywords", "source",
@@ -75,9 +114,9 @@ def match(rows: list[dict], products: dict[str, list[str]], open_only: bool = Fa
             for kw, pat in pats:
                 if pat.search(title):
                     score += TITLE_HIT_POINTS
-                    hits.append(kw)
+                    hits.append(f"{kw} (title)")
                 elif pat.search(body):
-                    score += 1
+                    score += DESCRIPTION_HIT_POINTS
                     hits.append(kw)
             if hits:
                 product_scores[name] = score
@@ -112,7 +151,7 @@ def match(rows: list[dict], products: dict[str, list[str]], open_only: bool = Fa
             }
         )
 
-    df = pd.DataFrame(out, columns=COLUMNS)
+    df = pd.DataFrame(merge_cross_source(out), columns=COLUMNS)
     for col in ("closing_date", "published"):
         df[col] = pd.to_datetime(df[col], utc=True)
     if not df.empty:

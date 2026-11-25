@@ -135,7 +135,7 @@ st.dataframe(
                   "matched_product", "matched_keywords", "other_products",
                   "source", "stage", "link"],
     column_config={
-        "score": st.column_config.NumberColumn("Score", help="Keyword hits (title hits count double) plus a bonus if still open"),
+        "score": st.column_config.NumberColumn("Score", help="3 points per keyword in the title, 1 per keyword only in the description, plus 2 if still open"),
         "title": st.column_config.TextColumn("Title", width="large"),
         "buyer": "Buyer",
         "value": st.column_config.NumberColumn("Value (£)", format="%,.0f"),
